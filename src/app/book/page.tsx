@@ -587,6 +587,7 @@ export default function BookingWorkspace() {
           </section>
         )}
       </main>
+      <footer className="footer">© 2026 Anumeh Patil. All rights reserved.</footer>
     </div>
   );
 }
