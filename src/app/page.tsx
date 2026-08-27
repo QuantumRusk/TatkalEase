@@ -18,10 +18,10 @@ export default function Home() {
         </p>
 
         <div className="hero-actions">
-          <a className="primary-button" href="/book" target="_blank" rel="noopener noreferrer">
-            Try the booking demo <span aria-hidden="true">↗</span>
+          <a className="primary-button" href="/dashboard" target="_blank" rel="noopener noreferrer">
+            Open your dashboard <span aria-hidden="true">↗</span>
           </a>
-          <span className="helper-text">Opens the booking workspace in a new tab</span>
+          <span className="helper-text">Opens your booking dashboard in a new tab</span>
         </div>
 
         <section className="feature-grid" aria-label="How TatkalEase works">
