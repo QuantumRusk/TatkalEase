@@ -1,0 +1,16 @@
+**TatkalEase**
+
+TatkalEase is a web-based prototype for a calmer Tatkal-style train ticket booking experience. Instead of forcing users to enter everything during the current 5-minute chaotic booking window, it lets them prepare early — saving their route, travel class, passenger details, and berth preferences before the window even opens.
+
+When booking starts, users pre-authorize payment via UPI AutoPay, and a cryptographically signed token auto-submits the request at 10:00 AM, protected by silent bot-detection. Instead of a blind linear queue, a virtual waiting room shows live status per train and quota — if a train fills up, it automatically suggests the next available train or quota rather than leaving the user stuck.
+
+Payment status is never a black box: webhooks and WebSockets push live updates (Payment Received → Verifying Seat → Ticket Issued) instead of silent polling. If confirmation is delayed, a "Check Bank Status" option checks the transaction by Order ID before allowing repayment — preventing users from being double-charged while a payment is still processing.
+
+Users can also download a mock ticket and view booking history on the same device.
+
+TatkalEase uses simple browser storage and mock data — it does not handle real payments, identity documents, live train data, or actual bookings. It is an independent hackathon prototype demonstrating how better preparation and clearer status updates could improve the existing booking experience.
+
+*Not affiliated with IRCTC or Indian Railways.*
+
+---
+~230 words. Want me to adjust the tone (more casual/more formal) or trim further?
