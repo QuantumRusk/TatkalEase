@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { downloadMockTicketPdf } from "@/lib/mockTicketPdf";
 import { getSavedRoute } from "@/lib/savedRoute";
 import { clearPreauthorizedBooking, getPreauthorizedBooking, markBookingOpen, savePreauthorizedBooking } from "@/lib/preauthorizedBooking";
+import { saveBookingToHistory } from "@/lib/bookingHistory";
 
 type Passenger = { name: string; age: string; berth: string };
 type LogEntry = { id: number; text: string; tone?: "success" | "warning" };
@@ -172,6 +173,11 @@ export default function BookingWorkspace() {
       return () => window.clearTimeout(timer);
     }
   }, [stage, paymentPhase, delayed]);
+
+  useEffect(() => {
+    if (stage !== 4 || !pnr) return;
+    saveBookingToHistory({ pnr, orderId, train: selectedTrain, from, to, travelDate, travelClass, passengers: passengerSummary, confirmedAt: Date.now() });
+  }, [stage, pnr, orderId, selectedTrain, from, to, travelDate, travelClass, passengerSummary]);
 
   // Validate the trip and passenger details before preparing the booking.
   function submitPrepare(event: FormEvent) {

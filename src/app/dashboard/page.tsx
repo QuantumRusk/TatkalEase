@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { defaultSavedRoute, getSavedRoute, routeStations, saveSavedRoute, type SavedRoute } from "@/lib/savedRoute";
 import { getPreauthorizedBooking, type PreauthorizedBooking } from "@/lib/preauthorizedBooking";
+import { getBookingHistory, type BookingHistoryItem } from "@/lib/bookingHistory";
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true });
@@ -22,6 +23,8 @@ export default function Dashboard() {
   const [routeError, setRouteError] = useState("");
   const [routeSaved, setRouteSaved] = useState(false);
   const [preauthorizedBooking, setPreauthorizedBooking] = useState<PreauthorizedBooking | null>(null);
+  const [bookingHistory, setBookingHistory] = useState<BookingHistoryItem[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   useEffect(() => {
     setNow(new Date());
@@ -34,6 +37,7 @@ export default function Dashboard() {
     setSavedRoute(route);
     setRouteDraft(route);
     setPreauthorizedBooking(getPreauthorizedBooking());
+    setBookingHistory(getBookingHistory());
   }, []);
 
   function beginRouteEdit() {
@@ -56,6 +60,7 @@ export default function Dashboard() {
 
   const secondsUntilOpen = preauthorizedBooking ? Math.max(0, Math.ceil((preauthorizedBooking.opensAt - (now?.getTime() ?? Date.now())) / 1000)) : 0;
   const bookingIsOpen = Boolean(preauthorizedBooking && secondsUntilOpen === 0);
+  const latestBooking = bookingHistory[0];
 
   return (
     <div className="dashboard-shell">
@@ -87,6 +92,7 @@ export default function Dashboard() {
           <div className="route-preview"><span>YOUR SAVED ROUTE</span><strong>{savedRoute.from} <i>→</i> {savedRoute.to}</strong><small>Tomorrow · 3AC · Tatkal demo</small>{routeSaved && <b className="route-preview-saved">✓ Route updated</b>}</div>
         </section>
         <section className="live-preauth-card">{preauthorizedBooking ? <><div className="live-preauth-heading"><div><p className="micro-label">LIVE PRE-AUTHORIZED BOOKING</p><h2>{bookingIsOpen ? "Booking is now open." : "Your booking is ready."}</h2></div><span className={bookingIsOpen ? "open-pill" : "countdown-pill"}>{bookingIsOpen ? "OPEN NOW" : `OPENS IN 00:${String(secondsUntilOpen).padStart(2, "0")}`}</span></div><div className="live-booking-details"><div><span>ROUTE</span><strong>{preauthorizedBooking.from} → {preauthorizedBooking.to}</strong></div><div><span>TRAVEL</span><strong>{preauthorizedBooking.travelDate} · {preauthorizedBooking.travelClass}</strong></div><div><span>PASSENGERS</span><strong>{preauthorizedBooking.passengers.map((passenger) => `${passenger.name} (${passenger.age})`).join(", ")}</strong></div></div>{bookingIsOpen ? <a className="primary-button live-booking-action" href="/book">Fast check availability <span>→</span></a> : <p className="live-booking-note">You&apos;re all set. Enjoy till then. - we&apos;ll update this card when booking opens.</p>}</> : <div className="empty-live-booking"><p className="micro-label">LIVE PRE-AUTHORIZED BOOKING</p><h2>No booking done yet.</h2><p>When you prepare a booking, its live status and trip details will appear here.</p><a href="/book">Prepare a booking →</a></div>}</section>
+        <section className="earlier-bookings-card"><div className="earlier-bookings-heading"><div><p className="micro-label">EARLIER BOOKINGS</p><h2>{latestBooking ? "Your latest confirmed trip" : "No earlier bookings"}</h2></div><button className="history-button" disabled={bookingHistory.length <= 1} onClick={() => setHistoryOpen((open) => !open)}>History {bookingHistory.length > 1 ? `(${bookingHistory.length})` : ""}</button></div>{latestBooking ? <BookingRow booking={latestBooking} /> : <p className="earlier-empty">Confirmed mock tickets will be saved on this device and appear here.</p>}{historyOpen && bookingHistory.length > 1 && <div className="history-list">{bookingHistory.slice(1).map((booking) => <BookingRow booking={booking} key={booking.pnr} />)}</div>}</section>
         <section className="dashboard-grid">
           <article className="dashboard-card"><p className="micro-label">PROFILE STATUS</p><h3>Ready to book</h3><p>Your mock profile and passenger details are verified for this demo.</p><span className="small-status">✓ Profile complete</span></article>
           <article className="dashboard-card"><p className="micro-label">HOW IT WORKS</p><h3>Prepare before 10:00 AM</h3><p>We will show every update clearly, including safe bank-status checks if needed.</p><a href="/book">View booking flow →</a></article>
@@ -95,4 +101,8 @@ export default function Dashboard() {
       <footer className="footer">© 2026 Anumeh Patil. All rights reserved.</footer>
     </div>
   );
+}
+
+function BookingRow({ booking }: { booking: BookingHistoryItem }) {
+  return <div className="earlier-booking-row"><div><strong>{booking.from} → {booking.to}</strong><span>{booking.train.number} · {booking.travelClass} · PNR {booking.pnr}</span></div><time>{new Date(booking.confirmedAt).toLocaleString([], { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" })}</time></div>;
 }
