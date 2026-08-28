@@ -6,7 +6,7 @@ TatkalEase is an independent hackathon prototype that reimagines a calmer, safer
 
 ## Live demo
 
-[Add deployed Vercel or Netlify link here](PASTE_LIVE_DEMO_URL_HERE)
+[Check it out here](https://tatkal-ease.vercel.app/)
 
 ## Highlights
 
