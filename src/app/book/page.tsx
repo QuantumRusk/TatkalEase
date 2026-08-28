@@ -260,6 +260,11 @@ export default function BookingWorkspace() {
     setPnr("");
   }
 
+  function cancelBooking() {
+    clearPreauthorizedBooking();
+    window.location.assign("/dashboard");
+  }
+
   // Generate and download the mock ticket using the confirmed booking data.
   function downloadTicket() {
     downloadMockTicketPdf({
@@ -433,6 +438,7 @@ export default function BookingWorkspace() {
                 Nothing is charged yet. We&apos;ll auto-submit the moment
                 booking opens.
               </p>
+              <a className="home-return-link" href="/dashboard">← Go back to home</a>
             </form>
           </section>
         )}
@@ -516,6 +522,9 @@ export default function BookingWorkspace() {
                 Check availability again
               </button>
             )}
+            <button className="cancel-booking-button" onClick={cancelBooking}>
+              Cancel booking
+            </button>
           </section>
         )}
         {stage === 3 && (
@@ -525,6 +534,7 @@ export default function BookingWorkspace() {
             <p className="order-reference">
               ORDER ID <strong>{orderId}</strong>
             </p>
+            <p className="payment-safety-note">Important: Do not go back, close this window, or refresh this page while we confirm your mock booking.</p>
             <div className="payment-tracker">
               {["Payment Received", "Verifying Seat", "Ticket Issued"].map(
                 (name, index) => (
