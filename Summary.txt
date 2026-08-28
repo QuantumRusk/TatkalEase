@@ -13,4 +13,3 @@ TatkalEase uses simple browser storage and mock data — it does not handle real
 *Not affiliated with IRCTC or Indian Railways.*
 
 ---
-~230 words. Want me to adjust the tone (more casual/more formal) or trim further?
