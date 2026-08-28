@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { downloadMockTicketPdf } from "@/lib/mockTicketPdf";
+import { getSavedRoute } from "@/lib/savedRoute";
 
 type Passenger = { name: string; age: string; berth: string };
 type LogEntry = { id: number; text: string; tone?: "success" | "warning" };
@@ -61,6 +62,12 @@ export default function BookingWorkspace() {
   const [lastChecked, setLastChecked] = useState("");
   const [orderId, setOrderId] = useState("");
   const [pnr, setPnr] = useState("");
+
+  useEffect(() => {
+    const savedRoute = getSavedRoute();
+    setFrom(savedRoute.from);
+    setTo(savedRoute.to);
+  }, []);
 
   // Append activity messages while availability is being checked.
   const addLog = (text: string, tone?: LogEntry["tone"]) =>
