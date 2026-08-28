@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { downloadMockTicketPdf } from "@/lib/mockTicketPdf";
 import { getSavedRoute } from "@/lib/savedRoute";
+import { clearPreauthorizedBooking, getPreauthorizedBooking, markBookingOpen, savePreauthorizedBooking } from "@/lib/preauthorizedBooking";
 
 type Passenger = { name: string; age: string; berth: string };
 type LogEntry = { id: number; text: string; tone?: "success" | "warning" };
@@ -42,7 +43,7 @@ export default function BookingWorkspace() {
   const [travelDate, setTravelDate] = useState(tomorrow);
   const [travelClass, setTravelClass] = useState("3AC");
   const [passengers, setPassengers] = useState<Passenger[]>([
-    { name: "", age: "", berth: "No preference" },
+    { name: "Demo Citizen", age: "21", berth: "No preference" },
   ]);
   const [formError, setFormError] = useState("");
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -67,6 +68,21 @@ export default function BookingWorkspace() {
     const savedRoute = getSavedRoute();
     setFrom(savedRoute.from);
     setTo(savedRoute.to);
+    const activeBooking = getPreauthorizedBooking();
+    if (!activeBooking) return;
+    setFrom(activeBooking.from);
+    setTo(activeBooking.to);
+    setTravelDate(activeBooking.travelDate);
+    setTravelClass(activeBooking.travelClass);
+    setPassengers(activeBooking.passengers);
+    setOrderId(activeBooking.orderId);
+    setPnr(activeBooking.pnr);
+    if (Date.now() >= activeBooking.opensAt) {
+      setStage(2);
+    } else {
+      setPrepared(true);
+      setCountdown(Math.max(1, Math.ceil((activeBooking.opensAt - Date.now()) / 1000)));
+    }
   }, []);
 
   // Append activity messages while availability is being checked.
@@ -96,7 +112,10 @@ export default function BookingWorkspace() {
 
   // Move from preparation to availability tracking when the countdown ends.
   useEffect(() => {
-    if (prepared && stage === 1 && countdown === 0) setStage(2);
+    if (prepared && stage === 1 && countdown === 0) {
+      markBookingOpen();
+      setStage(2);
+    }
   }, [prepared, stage, countdown]);
 
   // Simulate availability checks and the optional alternate-train offer.
@@ -169,10 +188,11 @@ export default function BookingWorkspace() {
       return;
     }
     setFormError("");
-    setOrderId(
-      `TE-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`,
-    );
-    setPnr(`TE${Math.random().toString(36).slice(2, 8).toUpperCase()}`);
+    const nextOrderId = `TE-${Date.now().toString(36).toUpperCase()}-${Math.floor(Math.random() * 900 + 100)}`;
+    const nextPnr = `TE${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+    setOrderId(nextOrderId);
+    setPnr(nextPnr);
+    savePreauthorizedBooking({ from, to, travelDate, travelClass, passengers, orderId: nextOrderId, pnr: nextPnr, opensAt: Date.now() + 20000 });
     setPrepared(true);
     setCountdown(20);
   }
@@ -224,6 +244,7 @@ export default function BookingWorkspace() {
 
   // Return the prototype to its initial preparation state.
   function resetBooking() {
+    clearPreauthorizedBooking();
     setStage(1);
     setPrepared(false);
     setCountdown(20);
@@ -430,10 +451,13 @@ export default function BookingWorkspace() {
             <p className="status-copy">
               We&apos;ll check availability automatically when booking opens.
             </p>
+            <a className="dashboard-return-link" href="/dashboard">
+              Go back and enjoy until booking opens →
+            </a>
             {demoMode && (
               <button
                 className="secondary-button"
-                onClick={() => setCountdown(0)}
+                onClick={() => { markBookingOpen(); setCountdown(0); }}
               >
                 Simulate 10:00 AM
               </button>
