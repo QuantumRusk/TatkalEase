@@ -8,6 +8,8 @@ TatkalEase is an independent hackathon prototype that reimagines a calmer, safer
 
 [Check it out here](https://tatkal-ease.vercel.app/)
 
+[Video](https://youtu.be/1Q6DQl6B6bk)
+
 ## Highlights
 
 - Mobile-first landing page with an original TatkalEase visual identity.
